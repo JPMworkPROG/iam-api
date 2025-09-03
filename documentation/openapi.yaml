@@ -1,0 +1,765 @@
+openapi: 3.0.3
+info:
+  title: API REST com Autenticação JWT - NestJS
+  description: |
+    API REST moderna para demonstrar autenticação JWT, CRUD de usuários, validação de dados e testes automatizados.
+    
+    ## Fluxo de Autenticação
+    1. **Registro**: `POST /auth/register` - Cria nova conta
+    2. **Login**: `POST /auth/login` - Retorna access + refresh tokens
+    3. **Refresh**: `POST /auth/refresh` - Renova access token
+    4. **Uso**: Inclua `Authorization: Bearer <access_token>` nas requisições
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: jpm.work.prog@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desenvolvimento
+
+tags:
+  - name: Auth
+    description: Endpoints de autenticação e autorização
+  - name: Users
+    description: Operações CRUD de usuários
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar novo usuário
+      description: Cria uma nova conta de usuário no sistema
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+            examples:
+              user_example:
+                summary: Registro de usuário comum
+                value:
+                  name: "João Silva"
+                  email: "joao@example.com"
+                  password: "MinhaSenh@123"
+              admin_example:
+                summary: Registro de administrador
+                value:
+                  name: "Admin User"
+                  email: "admin@example.com"
+                  password: "AdminSenh@123"
+                  role: "admin"
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+              example:
+                payload:
+                  user:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
+                    name: "João Silva"
+                    email: "joao@example.com"
+                    role: "user"
+                    createdAt: "2024-01-15T10:30:00Z"
+                    updatedAt: "2024-01-15T10:30:00Z"
+                  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expiresIn: 900
+                meta:
+                  timestamp: "2024-01-15T10:30:00Z"
+                  requestId: "req_123456789"
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                statusCode: 400
+                message: 
+                  - "email must be a valid email"
+                  - "password must be longer than or equal to 8 characters"
+                error: "Bad Request"
+        '409':
+          description: Email já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                statusCode: 409
+                message: "Email already exists"
+                error: "Conflict"
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Fazer login
+      description: Autentica usuário e retorna tokens de acesso
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+            example:
+              email: "joao@example.com"
+              password: "MinhaSenh@123"
+      responses:
+        '200':
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+              example:
+                payload:
+                  user:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
+                    name: "João Silva"
+                    email: "joao@example.com"
+                    role: "user"
+                    createdAt: "2024-01-15T10:30:00Z"
+                    updatedAt: "2024-01-15T10:30:00Z"
+                  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expiresIn: 900
+                meta:
+                  timestamp: "2024-01-15T10:30:00Z"
+                  requestId: "req_987654321"
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                statusCode: 401
+                message: "Invalid credentials"
+                error: "Unauthorized"
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Renovar access token
+      description: Gera novo access token usando refresh token válido
+      operationId: refresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshDto'
+            example:
+              refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Token renovado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenSuccessResponse'
+              example:
+                payload:
+                  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expiresIn: 900
+                meta:
+                  timestamp: "2024-01-15T10:35:00Z"
+                  requestId: "req_111222333"
+        '401':
+          description: Refresh token inválido ou expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                statusCode: 401
+                message: "Invalid or expired refresh token"
+                error: "Unauthorized"
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Obter perfil do usuário logado
+      description: Retorna informações do usuário autenticado
+      operationId: getProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Perfil do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSuccessResponse'
+              example:
+                payload:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "João Silva"
+                  email: "joao@example.com"
+                  role: "user"
+                  createdAt: "2024-01-15T10:30:00Z"
+                  updatedAt: "2024-01-15T10:30:00Z"
+                meta:
+                  timestamp: "2024-01-15T10:30:00Z"
+                  requestId: "req_444555666"
+        '401':
+          description: Token inválido ou não fornecido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Listar usuários
+      description: Lista todos os usuários (apenas administradores)
+      operationId: getUsers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Número da página
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Itens por página
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: search
+          in: query
+          description: Buscar por nome ou email
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListSuccessResponse'
+              example:
+                payload:
+                  users:
+                    - id: "123e4567-e89b-12d3-a456-426614174000"
+                      name: "João Silva"
+                      email: "joao@example.com"
+                      role: "user"
+                      createdAt: "2024-01-15T10:30:00Z"
+                    - id: "987fcdeb-51a2-43d1-b456-426614174111"
+                      name: "Maria Santos"
+                      email: "maria@example.com"
+                      role: "admin"
+                      createdAt: "2024-01-15T11:00:00Z"
+                  pagination:
+                    page: 1
+                    limit: 10
+                    total: 2
+                    totalPages: 1
+                meta:
+                  timestamp: "2024-01-15T11:15:00Z"
+                  requestId: "req_777888999"
+        '401':
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Acesso negado - apenas administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                statusCode: 403
+                message: "Insufficient permissions"
+                error: "Forbidden"
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Obter usuário por ID
+      description: Busca usuário específico (admin ou próprio usuário)
+      operationId: getUserById
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do usuário
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSuccessResponse'
+              example:
+                payload:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "João Silva"
+                  email: "joao@example.com"
+                  role: "user"
+                  createdAt: "2024-01-15T10:30:00Z"
+                  updatedAt: "2024-01-15T10:30:00Z"
+                meta:
+                  timestamp: "2024-01-15T12:00:00Z"
+                  requestId: "req_000111222"
+        '401':
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                statusCode: 404
+                message: "User not found"
+                error: "Not Found"
+
+    put:
+      tags:
+        - Users
+      summary: Atualizar usuário
+      description: Atualiza dados do usuário (admin ou próprio usuário)
+      operationId: updateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do usuário
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+            example:
+              name: "João Silva Santos"
+              email: "joao.santos@example.com"
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSuccessResponse'
+              example:
+                payload:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "João Silva Santos"
+                  email: "joao.santos@example.com"
+                  role: "user"
+                  createdAt: "2024-01-15T10:30:00Z"
+                  updatedAt: "2024-01-15T12:30:00Z"
+                meta:
+                  timestamp: "2024-01-15T12:30:00Z"
+                  requestId: "req_333444555"
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Email já em uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      tags:
+        - Users
+      summary: Excluir usuário
+      description: Remove usuário do sistema (admin ou próprio usuário)
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do usuário
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Usuário excluído com sucesso
+        '401':
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token obtido através do endpoint `/auth/login` ou `/auth/register`.
+        
+        **Formato:** `Authorization: Bearer <access_token>`
+        
+        **Duração:** 15 minutos
+        
+        **Renovação:** Use `/auth/refresh` com o refresh token
+
+  schemas:
+    # Schema base para respostas de sucesso
+    ApiResponse:
+      type: object
+      properties:
+        payload:
+          type: object
+          description: Dados da resposta
+        meta:
+          type: object
+          description: Metadados adicionais (opcional)
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              description: Timestamp da resposta
+              example: "2024-01-15T10:30:00Z"
+            requestId:
+              type: string
+              description: ID único da requisição
+              example: "req_123456789"
+    # DTOs de entrada
+    RegisterDto:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nome completo do usuário
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          description: Endereço de email único
+          example: "joao@example.com"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]'
+          description: |
+            Senha forte contendo:
+            - Mínimo 8 caracteres
+            - Pelo menos 1 letra minúscula
+            - Pelo menos 1 letra maiúscula
+            - Pelo menos 1 número
+            - Pelo menos 1 caractere especial
+          example: "MinhaSenh@123"
+        role:
+          type: string
+          enum: [user, admin]
+          default: user
+          description: Papel do usuário no sistema
+          example: "user"
+
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email cadastrado
+          example: "joao@example.com"
+        password:
+          type: string
+          description: Senha do usuário
+          example: "MinhaSenh@123"
+
+    RefreshDto:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token válido obtido no login
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    UpdateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nome completo do usuário
+          example: "João Silva Santos"
+        email:
+          type: string
+          format: email
+          description: Novo endereço de email
+          example: "joao.santos@example.com"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]'
+          description: Nova senha (opcional)
+          example: "NovaSenh@456"
+
+    # Schemas de resposta com payload
+    AuthSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            payload:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/UserProfile'
+                accessToken:
+                  type: string
+                  description: JWT access token para autenticação
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken:
+                  type: string
+                  description: Refresh token para renovação
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expiresIn:
+                  type: integer
+                  description: Tempo de expiração do access token em segundos
+                  example: 900
+
+    TokenSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            payload:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  description: Novo JWT access token
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expiresIn:
+                  type: integer
+                  description: Tempo de expiração em segundos
+                  example: 900
+
+    UserSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/UserProfile'
+
+    UserListSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            payload:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/UserProfile'
+                pagination:
+                  $ref: '#/components/schemas/PaginationMeta'
+
+    # Entidades de resposta
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único do usuário
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Nome completo
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          description: Endereço de email
+          example: "joao@example.com"
+        role:
+          type: string
+          enum: [user, admin]
+          description: Papel no sistema
+          example: "user"
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação da conta
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+          example: "2024-01-15T10:30:00Z"
+
+
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Página atual
+          example: 1
+        limit:
+          type: integer
+          description: Itens por página
+          example: 10
+        total:
+          type: integer
+          description: Total de itens
+          example: 25
+        totalPages:
+          type: integer
+          description: Total de páginas
+          example: 3
+
+    # Schemas de erro
+    ApiError:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: Código de status HTTP
+          example: 400
+        message:
+          type: string
+          description: Mensagem de erro
+          example: "Invalid input data"
+        error:
+          type: string
+          description: Tipo do erro
+          example: "Bad Request"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp do erro
+          example: "2024-01-15T10:30:00Z"
+        path:
+          type: string
+          description: Endpoint que gerou o erro
+          example: "/auth/login"
+
+    ValidationError:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: array
+          items:
+            type: string
+          description: Lista de erros de validação
+          example: 
+            - "email must be a valid email"
+            - "password must be longer than or equal to 8 characters"
+        error:
+          type: string
+          example: "Bad Request"

@@ -1,0 +1,508 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-01-15T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_auth_register",
+      "parentId": "fld_auth",
+      "modified": 1642248000000,
+      "created": 1642248000000,
+      "url": "{{ _.base_url }}/auth/register",
+      "name": "Register - Usuário Comum",
+      "description": "Registra um novo usuário no sistema",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"password\": \"MinhaSenh@123\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1642248000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para extrair e salvar o ID do usuário criado\nif (insomnia.response.status === 'CREATED') {\n  const data = insomnia.response.json();\n  \n  if (data.id) {\n    insomnia.environment.set('user_id', data.id);\n    console.log('✅ User ID salvo:', data.id);\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_register_admin",
+      "parentId": "fld_auth",
+      "modified": 1642248100000,
+      "created": 1642248100000,
+      "url": "{{ _.base_url }}/auth/register",
+      "name": "Register - Administrador",
+      "description": "Registra um novo administrador no sistema",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"AdminSenh@123\",\n  \"role\": \"ADMIN\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1642247900000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para extrair e salvar o ID do admin criado\nif (insomnia.response.status === 'CREATED') {\n  const data = insomnia.response.json();\n  \n  if (data.id) {\n    insomnia.environment.set('admin_id', data.id);\n    insomnia.environment.set('user_id', data.id); // Para usar em outros endpoints\n    console.log('✅ Admin ID salvo:', data.id);\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_login",
+      "parentId": "fld_auth",
+      "modified": 1642248200000,
+      "created": 1642248200000,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login",
+      "description": "Autentica usuário e retorna tokens de acesso",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"joao@example.com\",\n  \"password\": \"MinhaSenh@123\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1642247800000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para extrair e salvar tokens de autenticação\nif (insomnia.response.status === 'OK') {\n  const data = insomnia.response.json();\n  \n  if (data.accessToken) {\n    insomnia.environment.set('access_token', data.accessToken);\n    console.log('✅ Access Token salvo');\n  }\n  \n  if (data.refreshToken) {\n    insomnia.environment.set('refresh_token', data.refreshToken);\n    console.log('✅ Refresh Token salvo');\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_login_admin",
+      "parentId": "fld_auth",
+      "modified": 1642248300000,
+      "created": 1642248300000,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login - Admin (Seed)",
+      "description": "Login com usuário admin criado no seed",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@authbase.com\",\n  \"password\": \"Admin@123456\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1642247700000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para extrair e salvar tokens de admin\nif (insomnia.response.status === 'OK') {\n  const data = insomnia.response.json();\n  \n  if (data.accessToken) {\n    insomnia.environment.set('access_token', data.accessToken);\n    insomnia.environment.set('admin_token', data.accessToken);\n    console.log('✅ Admin Access Token salvo');\n  }\n  \n  if (data.refreshToken) {\n    insomnia.environment.set('refresh_token', data.refreshToken);\n    insomnia.environment.set('admin_refresh_token', data.refreshToken);\n    console.log('✅ Admin Refresh Token salvo');\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_refresh",
+      "parentId": "fld_auth",
+      "modified": 1642248400000,
+      "created": 1642248400000,
+      "url": "{{ _.base_url }}/auth/refresh",
+      "name": "Refresh Token",
+      "description": "Gera novo access token usando refresh token válido",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refreshToken\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1642247600000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para atualizar tokens após refresh\nif (insomnia.response.status === 'OK') {\n  const data = insomnia.response.json();\n  \n  if (data.accessToken) {\n    insomnia.environment.set('access_token', data.accessToken);\n    console.log('✅ Novo Access Token salvo');\n  }\n  \n  if (data.refreshToken) {\n    insomnia.environment.set('refresh_token', data.refreshToken);\n    console.log('✅ Novo Refresh Token salvo');\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_me",
+      "parentId": "fld_users",
+      "modified": 1642248500000,
+      "created": 1642248500000,
+      "url": "{{ _.base_url }}/users/me",
+      "name": "Meu Perfil",
+      "description": "Retorna informações do usuário autenticado",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "metaSortKey": -1642247500000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para extrair e salvar o ID do usuário logado\nif (insomnia.response.status === 'OK') {\n  const data = insomnia.response.json();\n  \n  if (data.id) {\n    insomnia.environment.set('current_user_id', data.id);\n    if (!insomnia.environment.get('user_id')) {\n      insomnia.environment.set('user_id', data.id);\n    }\n    console.log('✅ Current User ID salvo:', data.id);\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_list",
+      "parentId": "fld_users",
+      "modified": 1642248600000,
+      "created": 1642248600000,
+      "url": "{{ _.base_url }}/users",
+      "name": "Listar Usuários",
+      "description": "Lista todos os usuários (apenas administradores)",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_page",
+          "name": "page",
+          "value": "1",
+          "description": "Número da página"
+        },
+        {
+          "id": "pair_limit",
+          "name": "limit",
+          "value": "10",
+          "description": "Itens por página"
+        },
+        {
+          "id": "pair_search",
+          "name": "search",
+          "value": "",
+          "description": "Buscar por nome ou email",
+          "disabled": true
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "metaSortKey": -1642247400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_get_by_id",
+      "parentId": "fld_users",
+      "modified": 1642248700000,
+      "created": 1642248700000,
+      "url": "{{ _.base_url }}/users/{{ _.user_id }}",
+      "name": "Obter Usuário por ID",
+      "description": "Busca usuário específico (admin ou próprio usuário)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "metaSortKey": -1642247300000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_create",
+      "parentId": "fld_users",
+      "modified": 1642248750000,
+      "created": 1642248750000,
+      "url": "{{ _.base_url }}/users",
+      "name": "Criar Usuário",
+      "description": "Cria um novo usuário (apenas administradores)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Novo Usuário\",\n  \"email\": \"novo@example.com\",\n  \"password\": \"NovaSenh@123\",\n  \"role\": \"USER\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "metaSortKey": -1642247250000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "afterResponseScript": "// Script para extrair e salvar o ID do usuário criado\nif (insomnia.response.status === 'CREATED') {\n  const data = insomnia.response.json();\n  \n  if (data.id) {\n    insomnia.environment.set('created_user_id', data.id);\n    console.log('✅ Created User ID salvo:', data.id);\n  }\n}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_update",
+      "parentId": "fld_users",
+      "modified": 1642248800000,
+      "created": 1642248800000,
+      "url": "{{ _.base_url }}/users/{{ _.user_id }}",
+      "name": "Atualizar Usuário",
+      "description": "Atualiza dados do usuário (admin ou próprio usuário)",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.santos@example.com\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_content_type"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "metaSortKey": -1642247200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_delete",
+      "parentId": "fld_users",
+      "modified": 1642248900000,
+      "created": 1642248900000,
+      "url": "{{ _.base_url }}/users/{{ _.user_id }}",
+      "name": "Excluir Usuário",
+      "description": "Remove usuário do sistema (admin ou próprio usuário)",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "metaSortKey": -1642247100000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_main",
+      "modified": 1642247000000,
+      "created": 1642247000000,
+      "name": "🔐 Autenticação",
+      "description": "Endpoints de autenticação e autorização",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1642247000000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_main",
+      "modified": 1642246900000,
+      "created": 1642246900000,
+      "name": "👥 Usuários",
+      "description": "Operações CRUD de usuários",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1642246900000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_main",
+      "parentId": null,
+      "modified": 1642246800000,
+      "created": 1642246800000,
+      "name": "API REST - AuthBase ",
+      "description": "Collection completa da API REST com autenticação JWT usando NestJS + TypeScript",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_base",
+      "parentId": "wrk_main",
+      "modified": 1642246700000,
+      "created": 1642246700000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "access_token": "",
+        "refresh_token": "",
+        "user_id": "",
+        "admin_id": "",
+        "admin_token": "",
+        "admin_refresh_token": "",
+        "current_user_id": "",
+        "created_user_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "access_token", 
+          "refresh_token",
+          "user_id",
+          "admin_id",
+          "admin_token",
+          "admin_refresh_token",
+          "current_user_id",
+          "created_user_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1642246700000,
+      "_type": "environment"
+    },
+    {
+      "_id": "env_development",
+      "parentId": "env_base",
+      "modified": 1642246600000,
+      "created": 1642246600000,
+      "name": "Development",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "access_token": "",
+        "refresh_token": "",
+        "user_id": "",
+        "admin_id": "",
+        "admin_token": "",
+        "admin_refresh_token": "",
+        "current_user_id": "",
+        "created_user_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "access_token",
+          "refresh_token", 
+          "user_id",
+          "admin_id",
+          "admin_token",
+          "admin_refresh_token",
+          "current_user_id",
+          "created_user_id"
+        ]
+      },
+      "color": "#7d69cb",
+      "isPrivate": false,
+      "metaSortKey": 1642246600000,
+      "_type": "environment"
+    },
+    {
+      "_id": "env_production",
+      "parentId": "env_base",
+      "modified": 1642246500000,
+      "created": 1642246500000,
+      "name": "Production",
+      "data": {
+        "base_url": "https://api.authbase.com",
+        "access_token": "",
+        "refresh_token": "",
+        "user_id": "",
+        "admin_id": "",
+        "admin_token": "",
+        "admin_refresh_token": "",
+        "current_user_id": "",
+        "created_user_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "access_token",
+          "refresh_token",
+          "user_id",
+          "admin_id",
+          "admin_token",
+          "admin_refresh_token",
+          "current_user_id",
+          "created_user_id"
+        ]
+      },
+      "color": "#d9534f",
+      "isPrivate": false,
+      "metaSortKey": 1642246500000,
+      "_type": "environment"
+    }
+  ]
+}
