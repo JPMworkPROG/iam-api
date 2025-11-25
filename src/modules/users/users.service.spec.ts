@@ -9,7 +9,7 @@ import { CreateRequestDto } from './dto/in/createRequest.dto';
 import { UpdateRequestDto } from './dto/in/updateRequest.dto';
 import { FindManyRequestDto } from './dto/in/findManyRequest.dto';
 import { UsersService } from './users.service';
-import { UserProfileResponseDto } from './dto/out/userProfileResponse.dto';
+import { UserProfileResponseDto } from '../auth/dto/out/userProfileResponse.dto';
 import { PasswordHasher } from '@shared/services/password-hasher.service';
 import { AuthenticatedUser } from '@shared/types/authenticated-user.type';
 

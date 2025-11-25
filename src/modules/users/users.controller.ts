@@ -33,9 +33,9 @@ export class UsersController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   async findMe(@CurrentUser() user: AuthenticatedUser): Promise<FindMeResponseDto> {
-    this.logger.log(`👤 Fetching profile for user: ${user.id}`);
+    this.logger.log(`Fetching profile for user: ${user.id}`);
     const result = await this.usersService.findMe(user);
-    this.logger.log(`✅ Profile fetched for user: ${user.id}`);
+    this.logger.log(`Profile fetched for user: ${user.id}`);
     return result;
   }
 
@@ -44,9 +44,9 @@ export class UsersController {
   async findMany(
     @Query() findManyUserDto: FindManyRequestDto,
   ): Promise<FindManyResponseDto> {
-    this.logger.log(`📋 Listing users - Page: ${findManyUserDto.page}, Limit: ${findManyUserDto.limit}`);
+    this.logger.log(`Listing users - Page: ${findManyUserDto.page}, Limit: ${findManyUserDto.limit}`);
     const result = await this.usersService.findMany(findManyUserDto);
-    this.logger.log(`✅ Found ${result.payload.length} users (Total: ${result.meta.total})`);
+    this.logger.log(`Found ${result.payload.length} users (Total: ${result.meta.total})`);
     return result;
   }
 
@@ -55,9 +55,9 @@ export class UsersController {
   async findOne(
     @Param('id') id: string
   ): Promise<FindOneResponseDto> {
-    this.logger.log(`🔍 Fetching user by ID: ${id}`);
+    this.logger.log(`Fetching user by ID: ${id}`);
     const result = await this.usersService.findOne(id);
-    this.logger.log(`✅ User found: ${id}`);
+    this.logger.log(`User found: ${id}`);
     return result;
   }
 
@@ -65,9 +65,9 @@ export class UsersController {
   @Roles('ADMIN')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateRequestDto): Promise<CreateResponseDto> {
-    this.logger.log(`➕ Creating new user with email: ${createUserDto.email}`);
+    this.logger.log(`Creating new user with email: ${createUserDto.email}`);
     const result = await this.usersService.create(createUserDto);
-    this.logger.log(`✅ User created successfully: ${result.id}`);
+    this.logger.log(`User created successfully: ${result.id}`);
     return result;
   }
 
@@ -78,9 +78,9 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateRequestDto
   ): Promise<UpdateResponseDto> {
-    this.logger.log(`✏️ Updating user: ${id}`);
+    this.logger.log(`Updating user: ${id}`);
     const result = await this.usersService.update(id, updateUserDto);
-    this.logger.log(`✅ User updated successfully: ${id}`);
+    this.logger.log(`User updated successfully: ${id}`);
     return result;
   }
 
@@ -90,8 +90,8 @@ export class UsersController {
   async remove(
     @Param('id') id: string
   ): Promise<void> {
-    this.logger.log(`🗑️ Deleting user: ${id}`);
+    this.logger.log(`Deleting user: ${id}`);
     await this.usersService.remove(id);
-    this.logger.log(`✅ User deleted successfully: ${id}`);
+    this.logger.log(`User deleted successfully: ${id}`);
   }
 }

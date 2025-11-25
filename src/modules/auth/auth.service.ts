@@ -33,7 +33,7 @@ export class AuthService {
     private readonly passwordHasher: PasswordHasher,
     private readonly jwtTokenService: JwtTokenService,
     private readonly passwordResetTokenService: PasswordResetTokenService,
-  ) {}
+  ) { }
 
   async register(registerDto: RegisterRequestDto): Promise<RegisterResponseDto> {
     this.logger.debug(`Checking if email exists: ${registerDto.email}`);
@@ -46,7 +46,7 @@ export class AuthService {
 
     this.logger.debug(`Hashing password for user: ${registerDto.email}`);
     const hashedPassword = await this.passwordHasher.hash(registerDto.password);
-    
+
     this.logger.debug(`Creating user in database: ${registerDto.email}`);
     const user = await this.authRepository.create({
       email: registerDto.email,
@@ -112,7 +112,7 @@ export class AuthService {
   async refresh(refreshDto: RefreshRequestDto): Promise<RefreshResponseDto> {
     this.logger.debug(`Verifying refresh token`);
     const payload = this.jwtTokenService.verifyRefreshToken(refreshDto.refreshToken);
-    
+
     this.logger.debug(`Looking up user by ID: ${payload.sub}`);
     const user = await this.authRepository.findById(payload.sub);
 
@@ -129,10 +129,10 @@ export class AuthService {
     });
 
     this.logger.log(`Token refreshed successfully for user: ${user.id}`);
-    return {
-      accessToken: tokens.accessToken,
-      expiresIn: tokens.expiresIn,
-    };
+    return new RefreshResponseDto(
+      tokens.accessToken,
+      tokens.expiresIn,
+    );
   }
 
   async requestPasswordReset(
@@ -140,7 +140,7 @@ export class AuthService {
   ): Promise<RequestPasswordResetResponseDto> {
     this.logger.debug(`Looking up user for password reset: ${requestDto.email}`);
     const user = await this.authRepository.findByEmail(requestDto.email);
-    
+
     this.logger.debug(`Generating password reset token`);
     const { token, expiresAt, expiresInSeconds } = this.passwordResetTokenService.generateToken();
 
@@ -175,7 +175,7 @@ export class AuthService {
 
     this.logger.debug(`Hashing new password for user: ${tokenData.user.id}`);
     const hashedPassword = await this.passwordHasher.hash(resetDto.newPassword);
-    
+
     this.logger.debug(`Updating password for user: ${tokenData.user.id}`);
     await this.authRepository.updatePassword(tokenData.user.id, hashedPassword);
 

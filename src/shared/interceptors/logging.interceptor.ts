@@ -31,7 +31,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const userInfo = user ? `User: ${user.id} (${user.email})` : 'Unauthenticated';
 
     // Log da requisição entrante
-    this.logger.log(`📥 ${method} ${url} - IP: ${ip} - ${userInfo}`);
+    this.logger.log(`${method} ${url} - IP: ${ip} - ${userInfo}`);
 
     return next.handle().pipe(
       tap((data) => {
@@ -43,7 +43,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const responseSize = data ? JSON.stringify(data).length : 0;
 
         this.logger.log(
-          `📤 ${method} ${url} - ${statusCode} - ${duration}ms - ${responseSize} bytes`,
+          `${method} ${url} - ${statusCode} - ${duration}ms - ${responseSize} bytes`,
         );
       }),
       catchError((error) => {
@@ -51,7 +51,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const duration = Date.now() - startTime;
 
         this.logger.error(
-          `❌ ${method} ${url} - ERROR: ${error.message} - ${duration}ms - ${userInfo}`,
+          `${method} ${url} - ERROR: ${error.message} - ${duration}ms - ${userInfo}`,
           error.stack,
         );
 
