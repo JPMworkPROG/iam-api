@@ -1,15 +1,14 @@
+import * as dotenv from 'dotenv';
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+
+// Carregar variáveis de ambiente do arquivo .env
+dotenv.config();
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Starting database seeding...');
-
-  // Limpar dados existentes (opcional - remova se quiser preservar dados)
-  console.log('🧹 Cleaning existing data...');
-  await prisma.user.deleteMany();
-
   // Hash para as senhas (mesmo padrão que será usado na aplicação)
   const saltRounds = 10;
 
@@ -18,7 +17,7 @@ async function main() {
   const adminPassword = await bcrypt.hash('Admin@123456', saltRounds);
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@authbase.com',
+      email: 'admin@iamBase.com',
       name: 'Administrador do Sistema',
       password: adminPassword,
       role: Role.ADMIN,
@@ -34,7 +33,7 @@ async function main() {
 
   // Criar usuários comuns de exemplo
   console.log('👥 Creating sample users...');
-  
+
   const users = [
     {
       email: 'joao.silva@example.com',
@@ -79,9 +78,9 @@ async function main() {
   console.log(`   Total users: ${totalUsers}`);
   console.log(`   Admin users: ${adminCount}`);
   console.log(`   Regular users: ${userCount}`);
-  
+
   console.log('\n🔑 Default credentials:');
-  console.log('   Admin: admin@authbase.com / Admin@123456');
+  console.log('   Admin: admin@iamBase.com / Admin@123456');
   console.log('   User:  joao.silva@example.com / User@123456');
   console.log('   User:  maria.santos@example.com / User@789012');
   console.log('   User:  pedro.oliveira@example.com / User@345678');
